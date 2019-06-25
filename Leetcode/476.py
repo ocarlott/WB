@@ -2,8 +2,8 @@ class Solution:
     def findComplement(self, num: int) -> int:
         mask = 0
         for i in range(32): # O(logn). Try to find correct mask
-            mask += 2 ** i
+            mask += 2 ** i # O(logi). Log(1) + Log(2) + .. + Log(N) < NLogN
             if num <= mask:
                 break
         return ~num & mask
-# O(logn) for time. O(1) for space
+# O(nlogn) for time. O(1) for space
