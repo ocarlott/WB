@@ -17,4 +17,4 @@ class Solution:
             else:
                 left += 1
                 right -= 1
-# O(n) for time. O(1) for space.
+# O(n) for time. O(1) for space. The total change of left and right variables is always n.
