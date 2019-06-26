@@ -65,7 +65,7 @@ class Solution:
                     uf.notExists(position)
         return uf.getGroups()
             
-# O(N^2) for time and O(N^2) for space. This version extends the original grid to generalize 
+# O(N^2) for time and O(N^2) for space. This version extends the original grid to generalize how we check an element's neighbors
 
 # Version 2
 
