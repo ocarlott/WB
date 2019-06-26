@@ -41,6 +41,11 @@ class Solution:
                 rightVirtualNodeIndex = size + 1
                 bottomVirtualNodeIndex = size + 2
                 leftVirtualNodeIndex = size + 3
+                
+                def checkAndJoin(rowIndex, colIndex, position, offset):
+                    if board[rowIndex][colIndex] == 'O':
+                        uf.union(position, position + offset)
+                        
                 for row in range(rowCount): # O(N)
                     topEdge = row == 0
                     bottomEdge = row == rowCount - 1
@@ -55,30 +60,22 @@ class Solution:
                             position = row * colCount + col
                             if topEdge:
                                 uf.union(position, topVirtualNodeIndex)
-                                if board[below][col] == 'O':
-                                    uf.union(position, position + colCount)
+                                checkAndJoin(below, col, position, colCount)
                             elif bottomEdge:
                                 uf.union(position, size + 2)
-                                if board[above][col] == 'O':
-                                    uf.union(position, position - colCount)
+                                checkAndJoin(above, col, position, -colCount)
                             else:
-                                if board[below][col] == 'O':
-                                    uf.union(position, position + colCount)
-                                if board[above][col] == 'O':
-                                    uf.union(position, position - colCount)
+                                checkAndJoin(below, col, position, colCount)
+                                checkAndJoin(above, col, position, -colCount)
                             if rightEdge:
                                 uf.union(position, size + 1)
-                                if board[row][left] == 'O':
-                                    uf.union(position, position - 1)
+                                checkAndJoin(row, left, position, -1)
                             elif leftEdge:
                                 uf.union(position, size + 3)
-                                if board[row][right] == 'O':
-                                    uf.union(position, position + 1)
+                                checkAndJoin(row, right, position, 1)
                             else:
-                                if board[row][left] == 'O':
-                                    uf.union(position, position - 1)
-                                if board[row][right] == 'O':
-                                    uf.union(position, position + 1)
+                                checkAndJoin(row, left, position, -1)
+                                checkAndJoin(row, right, position, 1)
                 for row in range(rowCount): # O(N)
                     for col in range(colCount): # O(M)
                         position = row * colCount + col
