@@ -75,13 +75,18 @@ class Solution:
         if rowCount == 0:
             return 0
         colCount = len(grid[0])
-        uf = UnionFind(rowCount * colCount) # O(NM) time and space
-        for row in range(rowCount): # O(N)
+        uf = UnionFind(rowCount * colCount) # O(N^2) time and space
+        
+        def checkAndJoin(rowIndex, colIndex, position, offset):
+            if grid[rowIndex][colIndex] == '1':
+                uf.union(position, position + offset)
+                
+        for row in range(rowCount): # O(N^2)
             topSide = row == 0
             bottomSide = row == rowCount - 1
             above = row - 1
             below = row + 1
-            for col in range(colCount): # O(M)
+            for col in range(colCount):
                 position = row * colCount + col
                 if grid[row][col] == '1':
                     leftSide = col == 0
@@ -90,28 +95,20 @@ class Solution:
                     right = col + 1
                     if rowCount > 1:
                         if topSide:
-                            if grid[below][col] == '1':
-                                uf.union(position, position + colCount)
+                            checkAndJoin(below, col, position, colCount)
                         elif bottomSide:
-                            if grid[above][col] == '1':
-                                uf.union(position, position - colCount)
+                            checkAndJoin(above, col, position, -colCount)
                         else:
-                            if grid[below][col] == '1':
-                                uf.union(position, position + colCount)
-                            if grid[above][col] == '1':
-                                uf.union(position, position - colCount)
+                            checkAndJoin(below, col, position, colCount)
+                            checkAndJoin(above, col, position, -colCount)
                     if colCount > 1:
                         if leftSide:
-                            if grid[row][right] == '1':
-                                uf.union(position, position + 1)
+                            checkAndJoin(row, right, position, 1)
                         elif rightSide:
-                            if grid[row][left] == '1':
-                                uf.union(position, position - 1)
+                            checkAndJoin(row, left, position, -1)
                         else:
-                            if grid[row][right] == '1':
-                                uf.union(position, position + 1)
-                            if grid[row][left] == '1':
-                                uf.union(position, position - 1)
+                            checkAndJoin(row, right, position, 1)
+                            checkAndJoin(row, left, position, -1)
                 else:
                     uf.notExists(position)
         return uf.getGroups()
