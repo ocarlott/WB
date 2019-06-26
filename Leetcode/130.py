@@ -4,8 +4,12 @@ class UnionFind:
         self.parent = [x for x in range(size)]
         
     def find(self, el):
+        path = []
         while self.parent[el] != el:
+            path.append(el)
             el = self.parent[el]
+        for item in path:
+            self.parent[item] = el
         return el
     
     def union(self, el1, el2):
