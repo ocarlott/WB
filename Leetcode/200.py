@@ -47,9 +47,9 @@ class Solution:
         for row in range(rowCount): # O(N^2)
             for col in range(colCount):
                 newGrid[row + 1][col + 1] = grid[row][col]
-        uf = UnionFind(newGridRowCount * newGridColCount) # O(N^2) time and space
-        for row in range(newGridRowCount): # O(N^2)
-            for col in range(newGridColCount):
+        uf = UnionFind(newGridRowCount * newGridColCount) # O(NM) time and space
+        for row in range(newGridRowCount): # O(N)
+            for col in range(newGridColCount): # O(M)
                 position = row * newGridColCount + col
                 if row > 0 and col > 0 and row < newGridRowCount - 1 and col < newGridColCount - 1 and newGrid[row][col] == '1':
                     uf.union(position, position)
@@ -75,13 +75,13 @@ class Solution:
         if rowCount == 0:
             return 0
         colCount = len(grid[0])
-        uf = UnionFind(rowCount * colCount) # O(N^2) time and space
-        for row in range(rowCount): # O(N^2)
+        uf = UnionFind(rowCount * colCount) # O(NM) time and space
+        for row in range(rowCount): # O(N)
             topSide = row == 0
             bottomSide = row == rowCount - 1
             above = row - 1
             below = row + 1
-            for col in range(colCount): # O(N^2)
+            for col in range(colCount): # O(M)
                 position = row * colCount + col
                 if grid[row][col] == '1':
                     leftSide = col == 0
@@ -116,4 +116,4 @@ class Solution:
                     uf.notExists(position)
         return uf.getGroups()
             
-# O(N^2) for time and O(N^2) for space 
+# O(NM) for time and O(NM) for space 
