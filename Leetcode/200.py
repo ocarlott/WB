@@ -17,10 +17,10 @@ class UnionFind:
         parent2 = self.find(el2)
         if parent1 != parent2:
             if self.parent[parent1] < self.parent[parent2]:
-                self.rank[parent2] += self.rank[parent1]
+                self.rank[parent2] += self.rank[parent1] + 1
                 self.parent[parent1] = parent2
             elif self.parent[parent1] >= self.parent[parent2]:
-                self.rank[parent1] += self.rank[parent2]
+                self.rank[parent1] += self.rank[parent2] + 1
                 self.parent[parent2] = parent1
     
     def notExists(self, index):
