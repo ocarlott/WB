@@ -13,9 +13,10 @@ class MyHashMap:
         value will always be non-negative.
         """
         if key >= self.size:
-            for i in range(self.size, key + 1):
+            newSize = int(key * 1.3)
+            for i in range(self.size, newSize + 1):
                 self.array.append(-1)
-                self.size = key + 1
+                self.size = newSize + 1
         self.array[key] = value
         
 
