@@ -16,7 +16,7 @@ class MyHashMap:
             newSize = int(key * 1.3)
             for i in range(self.size, newSize + 1):
                 self.array.append(-1)
-                self.size = newSize + 1
+            self.size = newSize + 1
         self.array[key] = value
         
 
