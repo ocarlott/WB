@@ -29,7 +29,7 @@ class TrieTree:
     def searchEveryChar(self, word):
         current = self.root
         for i in range(len(word)):
-            if word[i] not in current.children or not current.isEndOfWord:
+            if word[i] not in current.children:
                 return False
             current = current.children[word[i]]
         return current.isEndOfWord
