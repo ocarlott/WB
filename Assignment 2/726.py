@@ -2,191 +2,142 @@ import string
 from collections import defaultdict
 
 class Atom:
-    def __init__(self, name = None):
+    def __init__(self, name, count):
         self.name = name
-        self.count = 1
-        
-    def addName(self, name):
-        self.name = name
-        
-    def addCount(self, stCount):
-        self.count = int(stCount)
+        self.count = int(count)
+        self.mul = 1
         
     def __str__(self):
         return f"Atom {self.name} has {self.count}"
         
-class ListNode:
-    def __init__(self, level):
-        self.atoms = []
-        self.level = level
-        self.mul = 1
+class Stack:
+    def __init__(self):
+        self.array = []
         
-    def addMul(self, mul):
-        self.mul *= int(mul)
+    def top(self):
+        return "" if len(self.array) == 0 else self.array[-1]
+    
+    def push(self, char):
+        self.array.append(char)
         
-    def __repr__(self):
-        print(f"There are {len(self.atoms)} atoms and mul of {self.mul}:")
-        for atom in self.atoms:
-            print(atom)
-        return ""
-        
-class KeyNode:
-    def __init__(self, name):
-        self.name = name
-        self.left = None
-        self.right = None
-        
+    def pop(self):
+        return self.array.pop()
+    
+    def isEmpty(self):
+        return len(self.array) == 0
+    
 class Solution:
     def countOfAtoms(self, formula: str) -> str:
         lowercase = set(string.ascii_lowercase)
         uppercase = set(string.ascii_uppercase)
         level = 0
-        currentAtoms = None
-        currentName = []
-        currentCount = []
-        currentMul = []
-        listCounter = []
-        keyRoot = None
-        startMul = False
-        
-        def propagrateMul(mul, level):
-            for ln in listCounter:
-                if ln.level > level:
-                    ln.mul *= int(mul)
-                    ln.level -= 1
-        
-        def addToKeyTree(el):
-            nonlocal keyRoot
-            if keyRoot is None:
-                keyRoot = KeyNode(el)
-            else:
-                current = keyRoot
-                while True:
-                    if current.name > el:
-                        if current.left is None:
-                            current.left = KeyNode(el)
-                            break
-                        else:
-                            current = current.left
-                    elif current.name < el:
-                        if current.right is None:
-                            current.right = KeyNode(el)
-                            break
-                        else:
-                            current = current.right
-                    else:
-                        break
-                        
-        for i in range(len(formula)):
-            if formula[i] in lowercase:
-                # Only capital char (in the same atom) can be in front of this letter
-                currentName.append(formula[i])
-            elif formula[i] in uppercase:
-                # What can be in front of this char are: Atom count, Atom name, Multiplier, ( and Nothing
-                if len(currentName) > 0:
-                    name = "".join(currentName)
-                    addToKeyTree(name)
-                    currentAtoms = currentAtoms if not currentAtoms is None else ListNode(level)
-                    currentAtoms.atoms.append(Atom(name))
-                    currentName = []
-                if len(currentCount) > 0:
-                    currentAtoms.atoms[-1].addCount("".join(currentCount))
-                    currentCount = []
-                if len(currentMul) > 0:
-                    mul = "".join(currentMul)
-                    currentAtoms.addMul(mul)
-                    propagrateMul(mul, level)
-                    level -= 1
-                    startMul = False
-                    currentMul = []
-                    listCounter.append(currentAtoms)
-                    currentAtoms = ListNode(level)
-                currentName.append(formula[i])
-            elif formula[i] == "(":
-                # What can be in front of this char are: Atom name, Atom count, and Multiplier
-                level += 1
-                if len(currentName) > 0:
-                    name = "".join(currentName)
-                    addToKeyTree(name)
-                    currentAtoms = currentAtoms if not currentAtoms is None else ListNode(level)
-                    currentAtoms.atoms.append(Atom(name))
-                    currentName = []
-                if len(currentCount) > 0:
-                    currentAtoms.atoms[-1].addCount("".join(currentCount))
-                    currentCount = []
-                if len(currentMul) > 0:
-                    mul = "".join(currentMul)
-                    currentAtoms.addMul(mul)
-                    propagrateMul(mul, level)
-                    level -= 1
-                    startMul = False
-                    currentMul = []
-                if not currentAtoms is None and len(currentAtoms.atoms) > 0:
-                    listCounter.append(currentAtoms)
-                    currentAtoms = ListNode(level)
-            elif formula[i] == ")":
-                # What can be in front of this char are: Atom count, Atom name and Multiplier
-                if len(currentName) > 0:
-                    name = "".join(currentName)
-                    addToKeyTree(name)
-                    currentAtoms = currentAtoms if not currentAtoms is None else ListNode(level)
-                    currentAtoms.atoms.append(Atom(name))
-                    currentName = []
-                if len(currentCount) > 0:
-                    currentAtoms.atoms[-1].addCount("".join(currentCount))
-                    currentCount = []
-                if len(currentMul) > 0:
-                    mul = "".join(currentMul)
-                    currentAtoms.addMul(mul)
-                    propagrateMul(mul, level)
-                    level -= 1
-                    startMul = False
-                    currentMul = []
-                startMul = True
-            else: # Number
-                if startMul:
-                    currentMul.append(formula[i])
-                else:
-                    currentCount.append(formula[i])
-            
-            if i == len(formula) - 1:
-                # These can be at the end of string: Atom name, Atom count and Multiplier
-                if len(currentName) > 0:
-                    name = "".join(currentName)
-                    addToKeyTree(name)
-                    currentAtoms.append(Atom(name))
-                    currentName = []
-                if len(currentCount) > 0:
-                    currentAtoms.atoms[-1].addCount("".join(currentCount))
-                    currentCount = []
-                if len(currentMul) > 0:
-                    mul = "".join(currentMul)
-                    level -= 1
-                    if len(currentAtoms.atoms) > 0:
-                        currentAtoms.addMul(mul)
-                    propagrateMul(mul, level)
-                    startMul = False
-                    currentMul = []
-                if len(currentAtoms.atoms) > 0:
-                    listCounter.append(currentAtoms)
-          
+        numbers = set("1234567890")
+        tokens = []
+        atomNames = set()
         counter = defaultdict(int)
-        result = []
-        # for ln in listCounter:
-        #     print(ln)
-        for ln in listCounter:
-            for atom in ln.atoms:
-                counter[atom.name] += atom.count * ln.mul
-                
-        def traverseKeyTree(rt):
-            if not rt.left is None:
-                traverseKeyTree(rt.left)
-            if counter[rt.name] == 1:
-                result.append(rt.name)
+        postfix = []
+        stack = Stack()
+        index = 0
+        currentToken = []
+        end = len(formula) - 1
+        while index < len(formula): # O(N)
+            if formula[index] == "(" or formula[index] == ")":
+                currentToken.append(formula[index])
+            if formula[index] in uppercase:
+                currentToken.append(formula[index])
+                while index < end and formula[index + 1] in lowercase:
+                    currentToken.append(formula[index + 1])
+                    index += 1
+                atomNames.add("".join(currentToken))
+            if formula[index] in numbers:
+                currentToken.append(formula[index])
+                while index < end and formula[index + 1] in numbers:
+                    currentToken.append(formula[index + 1])
+                    index += 1
+            index += 1
+            tokens.append("".join(currentToken))
+            currentToken = []
+           
+        for index, token in enumerate(tokens): # O(N)
+            if token == "(":
+                while stack.top() == "*":
+                    postfix.append(stack.pop())
+                if len(postfix) > 0 and tokens[index - 1] != "(":
+                    stack.push("+")
+                stack.push("(")
+            elif token == ")":
+                while stack.top() != "(":
+                    postfix.append(stack.pop())
+                stack.pop()
+            elif str.isdigit(token):
+                stack.push("*")
+                postfix.append(token)
             else:
-                result.append(f"{rt.name}{counter[rt.name]}")
-            if not rt.right is None:
-                traverseKeyTree(rt.right)
+                while stack.top() == "*":
+                    postfix.append(stack.pop())
+                if len(postfix) > 0 and tokens[index - 1] != "(":
+                    stack.push("+")
+                postfix.append(token)
+        
+        while not stack.isEmpty():
+            postfix.append(stack.pop())
+        
+        nestedList = []
+        for i in range(len(postfix)): # O(N)
+            token = postfix[i]
+            if token == "+":
+                right = stack.pop()
+                left = stack.pop()
+                temp = []
+                if isinstance(left, str):
+                    left = Atom(left, 1)
+                if isinstance(left, Atom):
+                    temp.append(left)
+                if isinstance(right, str):
+                    right = Atom(right, 1)
+                if isinstance(right, Atom):
+                    temp.append(right)
+                if isinstance(left, list):
+                    temp.extend(left)
+                if isinstance(right, list):
+                    temp.extend(right)
+                stack.push(temp)
                 
-        traverseKeyTree(keyRoot)
-        return "".join(result)
+            elif token == "*":
+                number = int(stack.pop())
+                value = stack.pop()
+                if isinstance(value, str):
+                    stack.push(Atom(value, number))
+                elif isinstance(value, Atom):
+                    value.count *= number
+                    stack.push(value)
+                elif isinstance(value, list):
+                    for atom in value:
+                        atom.mul *= int(number)
+                    stack.push(value)
+                else:
+                    print("Should not happen!")
+            else:
+                stack.push(token)
+        
+        atomList = stack.pop()
+        if isinstance(atomList, list):
+            for atom in atomList:
+                counter[atom.name] += atom.count * atom.mul
+            sortedName = sorted(counter.keys())
+            result = []
+            for key in sortedName:
+                if counter[key] == 1:
+                    result.append(f"{key}")
+                else:
+                    result.append(f"{key}{counter[key]}")
+            return "".join(result)
+        elif isinstance(atomList, str):
+            return atomList
+        else:
+            if atomList.count == 1:
+                return f"{atomList.name}"
+            else:
+                return f"{atomList.name}{atomList.count}"
+            
+# O(N) for time and space
