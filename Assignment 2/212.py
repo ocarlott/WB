@@ -17,86 +17,80 @@ class Trie:
             current = current.children[c]
         current.isEndOfWord = True
         
-    def search(self, word): # O(len(word))
+    def search(self, word):
         current = self.root
         for c in word:
             if not c in current.children:
-                return False
+                return 0
             current = current.children[c]
-        return current.isEndOfWord
-    
-    def searchPrefix(self, word): # O(len(word))
-        current = self.root
-        for c in word:
-            if not c in current.children:
-                return False
-            current = current.children[c]
-        return True
+        if current.isEndOfWord:
+            return 2
+        else:
+            return 1
+        
+class Graph:
+    def __init__(self):
+        self.graph = defaultdict(list)
+        
+    def addEdge(self, u, v):
+        self.graph[u].append(v)
         
 class Solution:
     def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
         trie = Trie()
-        for word in words: # O(K)
+        maxWordLength = 0
+        for word in words: # O(K*L) for time and space
+            if len(word) > maxWordLength:
+                maxWordLength = len(word)
             trie.insert(word)
         rowCount = len(board)
         colCount = len(board[0])
-        
-        def getNeighbors(coord, usedBoxes): # O(1)
-            row, col = coord
-            nonlocal rowCount, colCount
-            top = row == 0
-            left = col == 0
-            bottom = row == rowCount - 1
-            right = col == colCount - 1
-            neighbors = []
-            if not top:
-                if not ((row - 1) * colCount + col) in usedBoxes:
-                    neighbors.append((row - 1, col))
-            if not bottom:
-                if not ((row + 1) * colCount + col) in usedBoxes:
-                    neighbors.append((row + 1, col))
-            if not left:
-                if not (row * colCount + (col - 1)) in usedBoxes:
-                    neighbors.append((row, col - 1))
-            if not right:
-                if not (row * colCount + (col + 1)) in usedBoxes:
-                    neighbors.append((row, col + 1))
-            return neighbors
-           
+        g = Graph() # O(N*M) for space
         result = set()
-        
-        def backtrack(coord, usedTupleList, usedBoxes):
-            row, col = coord
-            nonlocal trie, board, rowCount, colCount, result
-            usedTupleList.append((row, col))
-            usedBoxes.add(row * colCount + col)
-            wordArr = []
-            for coord in usedTupleList:
-                wordArr.append(board[coord[0]][coord[1]])
-            word = "".join(wordArr) # < O(L)
-            if not trie.searchPrefix(word): # < O(L)
-                usedTupleList.pop()
-                usedBoxes.remove(row * colCount + col)
-                return
-            if trie.search(word): # < O(L)
-                result.add(word)
-                # usedTupleList.pop()
-                # usedBoxes.remove(row * colCount + col)
-                # return
-            neighbors = getNeighbors((row, col), usedBoxes)
-            if len(neighbors) == 0:
-                return
-            for neighbor in neighbors:
-                cpTupleList = usedTupleList.copy() # O(L)
-                cpSet = usedBoxes.copy() # O(L)
-                backtrack(neighbor, cpTupleList, cpSet)
-        
-        for row in range(rowCount): # For the backtrack function, we can think that for each element picked, we have at most 4 options to pick the next element. So the upperbound will be O(4^(NM)).
+        letterList = [] # O(N* M) for space
+        for row in range(rowCount): # O(NM)
             for col in range(colCount):
-                usedTupleList = []
-                usedBoxes = set()
-                backtrack((row, col), usedTupleList, usedBoxes)
+                letterList.append(board[row][col])
+        def dfs(v, visited, wordList):
+            nonlocal trie, g, letterList
+            if v in visited:
+                return False
+            visited.add(v)
+            wordList.append(letterList[v])
+            word = "".join(wordList)
+            search = trie.search(word)
+            if search == 0:
+                return True # Return true because vertice has been added to processing list
+            elif search == 2:
+                result.add(word)
+            if len(wordList) >= maxWordLength:
+                return True
+            for index, item in enumerate(g.graph[v]): # O(1)
+                if dfs(item, visited, wordList):
+                    visited.remove(item)
+                    wordList.pop()
+            return True # After we are done with a node, return true so the caller can remove this node value.
+                    
+        
+        for row in range(rowCount): # O(NM)
+            for col in range(colCount):
+                top = row == 0
+                left = col == 0
+                bottom = row == rowCount - 1
+                right = col == colCount - 1
+                if not top:
+                    g.addEdge(row * colCount + col, (row - 1) * colCount + col)
+                if not bottom:
+                    g.addEdge(row * colCount + col, (row + 1) * colCount + col)
+                if not left:
+                    g.addEdge(row * colCount + col, row * colCount + col - 1)
+                if not right:
+                    g.addEdge(row * colCount + col, row * colCount + col + 1)
+                    
+        for row in range(rowCount): # O(N)
+            for col in range(colCount): # O(M)
+                dfs(row * colCount + col, set(), []) # O(3^L) for time. Total of O(N*M*3^L) for time. O(L) for space.
+                
         return list(result)
-    
-# Word length: L, Width: N, Height: M, Words: K
-# O(L*4^(MN)) for time and space.
+           
+# O(N*M*3^L + K*L) for time. O(N*M + L) = O(N*M) for space. (L < N*M)
