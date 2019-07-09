@@ -17,4 +17,4 @@ class Solution:
             elif nums[mid] < target:
                 left = mid
             mid = (left + right) // 2
-# O(N) for time. O(1) for space.
+# O(Log(N)) for time. O(1) for space.
