@@ -9,3 +9,17 @@ class Solution:
                 globalMax = localMax
         return globalMax
 # O(N) for time. O(1) for space.
+
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        def getMax(nums, index):
+            if index == 0:
+                return (nums[0], nums[0])
+            else:
+                (localMax, globalMax) = getMax(nums, index - 1)
+                localMax = max(localMax + nums[index], nums[index])
+                globalMax = localMax if localMax > globalMax else globalMax
+                return (localMax, globalMax)
+        (localMax, globalMax) = getMax(nums, len(nums) - 1)
+        return globalMax
+# O(N) for time. O(1) for space.
