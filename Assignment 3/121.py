@@ -14,3 +14,17 @@ class Solution:
         (maxSell, maxProfit) = getMax(prices, 0)
         return maxProfit
 # O(N) for time. O(1) for space.
+
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        if len(prices) <= 1:
+            return 0
+        globalBest = 0
+        localBest = 0
+        minBuy = prices[0]
+        for n in range(1, len(prices)):
+            localBest = max(localBest, prices[n] - minBuy)
+            minBuy = min(prices[n], minBuy)
+            globalBest = max(localBest, globalBest)
+        return max(globalBest, 0)
+# O(N) for time. O(1) for space.
